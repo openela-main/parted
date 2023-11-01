@@ -1,0 +1,35 @@
+From d42cea08828c72c6f289add05acd3b93d481fbee Mon Sep 17 00:00:00 2001
+From: "Brian C. Lane" <bcl@redhat.com>
+Date: Mon, 23 Jul 2018 15:12:38 -0700
+Subject: [PATCH 85/86] parted.c: Always free peek_word
+
+If command_line_get_fs_type failed it would never free it, so put a free
+in both branches of the if.
+
+Related: rhbz#1602652
+---
+ parted/parted.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/parted/parted.c b/parted/parted.c
+index b49e1df..dae35a5 100644
+--- a/parted/parted.c
++++ b/parted/parted.c
+@@ -684,12 +684,13 @@ do_mkpart (PedDevice** dev, PedDisk** diskp)
+         if (part_type == PED_PARTITION_EXTENDED
+             || (peek_word && isdigit (peek_word[0]))) {
+                 fs_type = NULL;
++                free (peek_word);
+         } else {
++                free (peek_word);
+                 if (!command_line_get_fs_type (_("File system type?"),
+                                                &fs_type))
+                         goto error;
+         }
+-        free (peek_word);
+ 
+         if (!command_line_get_sector (_("Start?"), *dev, &start, &range_start, NULL))
+                 goto error;
+-- 
+2.17.1
+
