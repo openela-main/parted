@@ -1,0 +1,38 @@
+From 477968f0e73f2ec6b4427ab7c76fb6098699ec4e Mon Sep 17 00:00:00 2001
+From: "Brian C. Lane" <bcl@redhat.com>
+Date: Tue, 23 Apr 2019 13:52:25 -0700
+Subject: [PATCH 94/97] Fix end_input usage in do_resizepart
+
+It needs to be set to NULL, since it may not get set by the call to
+command_line_get_sector
+
+(cherry picked from commit ca845aeeddb17343c9289816833ca352f7c0d87b)
+
+Related: rhbz#1861804
+---
+ parted/parted.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/parted/parted.c b/parted/parted.c
+index 1733131..4552741 100644
+--- a/parted/parted.c
++++ b/parted/parted.c
+@@ -1541,6 +1541,7 @@ do_resizepart (PedDevice** dev, PedDisk** diskp)
+         PedGeometry             *range_end = NULL;
+         PedConstraint*          constraint;
+         int rc = 0;
++        char*                   end_input = NULL;
+ 
+         if (!disk) {
+                 disk = ped_disk_new (*dev);
+@@ -1561,7 +1562,6 @@ do_resizepart (PedDevice** dev, PedDisk** diskp)
+ 
+         start = part->geom.start;
+         end = oldend = part->geom.end;
+-        char *end_input;
+         if (!command_line_get_sector (_("End?"), *dev, &end, &range_end, &end_input))
+                 goto error;
+         _adjust_end_if_iec(&start, &end, range_end, end_input);
+-- 
+2.31.1
+

@@ -1,0 +1,55 @@
+From d74cd53b7a0db94e08c9e034bdf9d59273ada723 Mon Sep 17 00:00:00 2001
+From: Viktor Mihajlovski <mihajlov@linux.ibm.com>
+Date: Fri, 27 Sep 2019 18:34:46 +0300
+Subject: [PATCH] libparted/s390: Re-enabled virtio-attached DASD heuristics
+
+DASDs attached to KVM guest as virtio-blk devices are only handled
+properly, if the unique DASD geometry is detected. Commit id
+61dd3d4c5eb782eb43caa95342e63727db3f8281 has prevented proper geometry
+detection. Fixed by making sure that HDIO_GETGEO takes precedence
+on s390[x].
+
+Signed-off-by: Viktor Mihajlovski <mihajlov@linux.ibm.com>
+Signed-off-by: Brian C. Lane <bcl@redhat.com>
+---
+ libparted/arch/linux.c | 13 ++++++++++---
+ 1 file changed, 10 insertions(+), 3 deletions(-)
+
+diff --git a/libparted/arch/linux.c b/libparted/arch/linux.c
+index 7771a8b..a40e9f8 100644
+--- a/libparted/arch/linux.c
++++ b/libparted/arch/linux.c
+@@ -867,6 +867,7 @@ _device_probe_geometry (PedDevice* dev)
+         LinuxSpecific*          arch_specific = LINUX_SPECIFIC (dev);
+         struct stat             dev_stat;
+         struct hd_geometry      geometry;
++        int                     geometry_is_valid = 0;
+         int                     sector_size = 0;
+ 
+         if (!_device_stat (dev, &dev_stat))
+@@ -884,13 +885,19 @@ _device_probe_geometry (PedDevice* dev)
+         dev->bios_geom.heads = 0;
+         dev->bios_geom.cylinders = 0;
+ 
++        geometry_is_valid = !ioctl (arch_specific->fd, HDIO_GETGEO, &geometry)
++                            && geometry.sectors && geometry.heads;
++
++#if defined __s390__ || defined __s390x__
++        if (geometry_is_valid) {
++#else
+         if (!ioctl (arch_specific->fd, BLKSSZGET, &sector_size)) {
+                 /* get the sector count first */
+                 dev->bios_geom.sectors = 1 + (sector_size / PED_SECTOR_SIZE_DEFAULT);
+                 dev->bios_geom.heads = 255;
+-        } else if (!ioctl (arch_specific->fd, HDIO_GETGEO, &geometry)
+-                        && geometry.sectors && geometry.heads) {
+-                /* if BLKSSZGET failed, try the deprecated HDIO_GETGEO */
++        } else if (geometry_is_valid) {
++                /* if BLKSSZGET failed, use deprecated HDIO_GETGEO result */
++#endif
+                 dev->bios_geom.sectors = geometry.sectors;
+                 dev->bios_geom.heads = geometry.heads;
+         } else {
+-- 
+2.21.0
+

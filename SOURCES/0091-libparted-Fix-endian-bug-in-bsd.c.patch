@@ -1,0 +1,31 @@
+From da8572e6696c2593150af4ba6917dcfc142eebab Mon Sep 17 00:00:00 2001
+From: "A. Wilcox" <AWilcox@Wilcox-Tech.com>
+Date: Mon, 5 Aug 2019 09:05:00 -0700
+Subject: [PATCH 91/97] libparted: Fix endian bug in bsd.c
+
+You have to add 1 *before* doing the endian conversion, not after.
+
+Signed-off-by: Brian C. Lane <bcl@redhat.com>
+(cherry picked from commit d5827cf0606680b4c4e6bf25ac1a4af6e1092f3f)
+
+Resolves: rhbz#1980105
+---
+ libparted/labels/bsd.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libparted/labels/bsd.c b/libparted/labels/bsd.c
+index f253a32..1e79408 100644
+--- a/libparted/labels/bsd.c
++++ b/libparted/labels/bsd.c
+@@ -364,7 +364,7 @@ bsd_write (const PedDisk* disk)
+ 		max_part = i;
+ 	}
+ 
+-	label->d_npartitions = PED_CPU_TO_LE16 (max_part) + 1;
++	label->d_npartitions = PED_CPU_TO_LE16 (max_part + 1);
+ 	label->d_checksum = xbsd_dkcksum (label);
+ 
+ 	alpha_bootblock_checksum (bsd_specific->boot_code);
+-- 
+2.31.1
+

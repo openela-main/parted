@@ -1,0 +1,28 @@
+From 027f5669d4c78b035a0c9134608d8411d9617c4b Mon Sep 17 00:00:00 2001
+From: "Brian C. Lane" <bcl@redhat.com>
+Date: Mon, 13 Aug 2018 12:04:23 -0700
+Subject: [PATCH] linux.c: Use sys/sysmacros.h for major/minor
+
+gcc is also going to deprecate this at some point, so start using
+sys/sysmacros.h directly.
+
+Resolves: rhbz#1615592
+---
+ libparted/arch/linux.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/libparted/arch/linux.c b/libparted/arch/linux.c
+index 4ec3440..8eb54fa 100644
+--- a/libparted/arch/linux.c
++++ b/libparted/arch/linux.c
+@@ -36,6 +36,7 @@
+ #include <stdbool.h>
+ #include <dirent.h>
+ #include <sys/ioctl.h>
++#include <sys/sysmacros.h>      /* for major() and minor() */
+ #include <sys/stat.h>
+ #include <sys/types.h>
+ #include <sys/utsname.h>        /* for uname() */
+-- 
+2.17.1
+
