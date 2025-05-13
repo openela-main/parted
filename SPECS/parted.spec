@@ -1,7 +1,7 @@
 Summary: The GNU disk partition manipulation program
 Name:    parted
 Version: 3.5
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 URL:     http://www.gnu.org/software/parted
 
@@ -20,7 +20,10 @@ Patch0006: 0006-libparted-Fix-handling-of-gpt-partition-types.patch
 Patch0007: 0007-tests-Add-a-libparted-test-for-ped_partition_set_sys.patch
 Patch0008: 0008-libparted-Fix-handling-of-msdos-partition-types.patch
 Patch0009: 0009-tests-Add-a-libparted-test-for-ped_partition_set_sys.patch
-
+Patch0010: 0010-libparted-Fix-sun-disklabel-unhandled-exception.patch
+Patch0011: 0011-tests-Add-test-for-SUN-disklabel-handling.patch
+Patch0012: 0012-libparted-Fix-dvh-disklabel-unhandled-exception.patch
+Patch0013: 0013-tests-Add-test-for-dvh-with-a-bad-checksum.patch
 
 BuildRequires: gcc
 BuildRequires: e2fsprogs-devel
@@ -128,6 +131,16 @@ make check
 
 
 %changelog
+* Tue Jan 21 2025 Brian C. Lane <bcl@redhat.com> - 3.5-3
+- tests: Add test for dvh with a bad checksum (bcl)
+  Related: RHEL-73217
+- libparted: Fix dvh disklabel unhandled exception (bcl)
+  Related: RHEL-73217
+- tests: Add test for SUN disklabel handling (bcl)
+  Related: RHEL-73217
+- libparted: Fix sun disklabel unhandled exception (bcl)
+  Resolves: RHEL-73217
+
 * Tue Aug 09 2022 Brian C. Lane <bcl@redhat.com> - 3.5-2
 - Fix ped_partition_set_system handling of existing flags
   Resolves: rhbz#2116505
